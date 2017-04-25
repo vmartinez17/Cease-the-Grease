@@ -6,54 +6,6 @@ var mainMusic;
 var jumpSound;
 var deathSound;
 
-//var Oil = function (game, x, y, frame) {
-//    Phaser.Sprite.call(this, game, x, y, 'oil', frame);
-//    this.anchor.setTo(0.5, 0.5);
-//    this.game.physics.arcade.enableBody(this);
-//
-//    this.body.allowGravity = false;
-//    this.body.immovable = true;
-//
-//};
-//
-//var OilGroup = function (game, parent) {
-//    Phaser.Group.call(this, game, parent);
-//
-//    this.topOil = new Oil(this.game, 400, 0, 0);
-//    this.add(this.topOil);
-//
-//    this.bottomOil = new Oil(this.game, 400, 440, 1);
-//    this.add(this.bottomOil);
-//
-//    this.hasScored = false;
-//
-//    this.setAll('body.velocity.x', (-200 - (5 * score)));
-//};
-//
-//OilGroup.prototype = Object.create(Phaser.Group.prototype);
-//OilGroup.prototype.constructor = OilGroup;
-//
-//OilGroup.prototype.reset = function (x, y) {
-//
-//    // Step 1    
-//    this.topOil.reset(400, 0);
-//
-//    // Step 2
-//    this.bottomOil.reset(400, 440); // Step 2
-//
-//    // Step 3
-//    this.x = x;
-//    this.y = y;
-//
-//    // Step 4
-//    this.setAll('body.velocity.x', (-200 - (5 * score)));
-//
-//    // Step 5
-//    this.hasScored = false;
-//
-//    // Step 6
-//    this.exists = true;
-//};
 
 var mainState = {
     preload: function ()
@@ -212,7 +164,7 @@ var mainState = {
 
         game.physics.arcade.enable(oil);
 
-        oil.body.velocity.x = -200 - (2 * score); // Add velocity to the oil spill to make it move left
+        oil.body.velocity.x = -200 - (5 * score); // Add velocity to the oil spill to make it move left
 
         oil.checkWorldBounds = true;
         oil.outOfBoundsKill = true; // Kill the oil when its out of bounds
@@ -226,14 +178,13 @@ var mainState = {
         var hole = Math.floor(Math.random() * 5) + 1;
 
         // Add the 6 oils 
-        // With one big hole at position 'hole' and 'hole + 1'
+        // With one big hole at position 'hole', 'hole + 1' and 'hole + 2'
         for (var i = 0; i < 8; i++) {
             if (i !== hole && i !== hole + 1 && i !== hole + 2) {
                 this.addOneOil(400, i * 60);
                 oilGroupnum++; //keeps track of size of group
             }
         }
-
     },
     checkScore: function (oils)
     {
@@ -252,6 +203,7 @@ var gameOverState = {
     preload: function ()
     {
         game.load.image('gameOverBackground', 'assets/backgrounds/gameOver.png'); // Load game over image
+        game.sound.stopAll(); //kills all sound
     },
     create: function ()
     {
@@ -271,6 +223,8 @@ var gameOverState = {
         game.input.onDown.add(function () {
             game.state.start('score');
         }, self); // Input listener go to score screen on mouse click
+
+        
     },
     update: function ()
     {
@@ -278,7 +232,7 @@ var gameOverState = {
         timer += game.time.elapsed;
         if (timer >= 500)
         {
-            timer -= 500;
+            timer = 0;
             gameOverLabel.visible = !gameOverLabel.visible;
         }
     }
@@ -401,7 +355,7 @@ var scoreState = {
         twitterButton.endFill();
         twitterButton.inputEnabled = true;
         twitterButton.events.onInputDown.add(function () {
-            var twpopup = window.open("https://twitter.com/intent/tweet?text=Help Trippy Out! http://people.tamu.edu/~valexis22009/ceasegrease/", "pop", "width=600, height=400, scrollbars=no");
+            var twpopup = window.open("https://twitter.com/intent/tweet?text=Help Trippy Out! I dodged " + score + " grease obstacles can you do better? http://people.tamu.edu/~valexis22009/ceasegrease/", "pop", "width=600, height=400, scrollbars=no");
             return false;
         }, this);
 
@@ -551,8 +505,13 @@ var scoreState = {
                 letter = "M.";
             }, this, 2, 1, 0); // Keyboard button
             var entButton = game.add.button(143, game.world.centerY + 180, 'enter', function () {
-                localStorage.setItem(score.toString(), word);
-                game.state.start('leader');
+				if (word == ""){
+					game.state.start('leader');
+				}
+                else {
+					localStorage.setItem(score.toString(), word);
+					game.state.start('leader');
+				}
             }, this, 2, 1, 0); // Enter button
         }
     },
